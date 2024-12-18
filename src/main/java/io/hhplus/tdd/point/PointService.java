@@ -28,12 +28,32 @@ public class PointService {
 
     // Charge Point
     public UserPoint chargePoint(Long userId, Long pointId) {
-        return userPointTable.insertOrUpdate(userId, pointId);
+        // 사용자 포인트 조회
+        UserPoint userPoint = userPointTable.selectById(userId);
+
+        // 포인트 충전
+        pointId = userPoint.point() + pointId;
+        userPoint= userPointTable.insertOrUpdate(userId, pointId);
+
+        // 포인트 충전 내역 등록
+        pointHistoryTable.insert(userId, pointId, TransactionType.CHARGE, System.currentTimeMillis());
+
+        return userPoint;
     }
 
     // Use Point
     public UserPoint usePoint(Long userId, Long pointId) {
-        return userPointTable.insertOrUpdate(userId, pointId);
+        // 사용자 포인트 조회
+        UserPoint userPoint = userPointTable.selectById(userId);
+
+        // 포인트 차감
+        pointId = userPoint.point() - pointId;
+        userPoint = userPointTable.insertOrUpdate(userId, pointId);
+
+        // 포인트 사용 내역 등록
+        pointHistoryTable.insert(userId, pointId, TransactionType.USE, System.currentTimeMillis());
+
+        return userPoint;
     }
 
 }
