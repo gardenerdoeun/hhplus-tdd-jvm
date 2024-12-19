@@ -74,7 +74,7 @@ public class PointService {
                 throw new IllegalStateException("잔액이 부족합니다.");
             }
 
-            UserPoint updatedPoint = userPointTable.insertOrUpdate(userId, -amount);
+            UserPoint updatedPoint = userPointTable.insertOrUpdate(userId, currentPoint.point()-amount);
             pointHistoryTable.insert(userId, amount, TransactionType.USE, System.currentTimeMillis());
 
             return updatedPoint;
