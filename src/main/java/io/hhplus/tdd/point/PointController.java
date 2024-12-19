@@ -11,15 +11,11 @@ import java.util.List;
 @RequestMapping("/point")
 public class PointController {
     public final PointService pointService;
-    public final PointValidator pointValidator;
 
     private static final Logger log = LoggerFactory.getLogger(PointController.class);
-    private final Validator validator;
 
-    public PointController(PointService pointService, PointValidator pointValidator, Validator validator) {
+    public PointController(PointService pointService) {
         this.pointService = pointService;
-        this.pointValidator = pointValidator;
-        this.validator = validator;
     }
 
     /**
@@ -54,14 +50,14 @@ public class PointController {
             @PathVariable long id,
             @RequestBody long amount
     ) throws IllegalAccessException {
-        pointValidator.ChargeValidate(amount);
         return pointService.chargePoint(id, amount);
     }
 
     /**
      * TODO - 특정 유저의 포인트를 사용하는 기능을 작성해주세요.
      * 정책
-     * - 포인트 잔액이 최소 100원이상 보유 중일 때 포인트 사용가능합니다.
+     * - 사용 할 포인트가 보유 포인트보다 많을 경우 사용 불가능합니다.
+     * - 포인트 잔액이 최소 100원이상 보유 중일 때 포인트 사용 가능합니다.
      * - 사용 가능한 포인트는 최대 100,000원입니다.
      */
     @PatchMapping("{id}/use")
@@ -69,7 +65,6 @@ public class PointController {
             @PathVariable long id,
             @RequestBody long amount
     ) throws IllegalAccessException {
-        pointValidator.UseValidate(amount);
         return pointService.usePoint(id, amount);
     }
 }
