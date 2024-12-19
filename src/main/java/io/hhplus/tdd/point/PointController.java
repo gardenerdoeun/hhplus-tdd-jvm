@@ -2,6 +2,7 @@ package io.hhplus.tdd.point;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.validation.Validator;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -10,11 +11,15 @@ import java.util.List;
 @RequestMapping("/point")
 public class PointController {
     public final PointService pointService;
+    public final PointValidator pointValidator;
 
     private static final Logger log = LoggerFactory.getLogger(PointController.class);
+    private final Validator validator;
 
-    public PointController(PointService pointService) {
+    public PointController(PointService pointService, PointValidator pointValidator, Validator validator) {
         this.pointService = pointService;
+        this.pointValidator = pointValidator;
+        this.validator = validator;
     }
 
     /**
@@ -39,23 +44,32 @@ public class PointController {
 
     /**
      * TODO - 특정 유저의 포인트를 충전하는 기능을 작성해주세요.
+     * 정책
+     * - 포인트 충전은 최소 100원 이상이어야 합니다.
+     * - 포인트 충전은 최대 100,000원을 초과할 수 없습니다.
+     * - 포인트 잔액 한도는 최대 500_000원 입니다.
      */
     @PatchMapping("{id}/charge")
     public UserPoint charge(
             @PathVariable long id,
             @RequestBody long amount
-    ) {
+    ) throws IllegalAccessException {
+        pointValidator.ChargeValidate(amount);
         return pointService.chargePoint(id, amount);
     }
 
     /**
      * TODO - 특정 유저의 포인트를 사용하는 기능을 작성해주세요.
+     * 정책
+     * - 포인트 잔액이 최소 100원이상 보유 중일 때 포인트 사용가능합니다.
+     * - 사용 가능한 포인트는 최대 100,000원입니다.
      */
     @PatchMapping("{id}/use")
     public UserPoint use(
             @PathVariable long id,
             @RequestBody long amount
-    ) {
+    ) throws IllegalAccessException {
+        pointValidator.UseValidate(amount);
         return pointService.usePoint(id, amount);
     }
 }
